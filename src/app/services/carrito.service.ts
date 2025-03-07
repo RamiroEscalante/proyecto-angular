@@ -23,6 +23,7 @@ export class CarritoService {
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <factura>
     <productos>`;
+    // Agrupar productos por ID para obtener la cantidad de cada uno
 
     let productosAgrupados: { [key: string]: { descripcion: string, precioUnitario: number, cantidad: number } } = {};
     
