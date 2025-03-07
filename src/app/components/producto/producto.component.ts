@@ -4,6 +4,7 @@ import { ProductoService } from '../../services/producto.service';
 import { CommonModule } from '@angular/common';
 import {Router} from '@angular/router';
 import { CarritoService } from '../../services/carrito.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-producto',//identificador de la etiqueta de mi componente 
@@ -12,7 +13,7 @@ import { CarritoService } from '../../services/carrito.service';
   styleUrl: './producto.component.css'//corchetes mas de una hoja de estilos
 })
 export class ProductoComponent implements OnInit {
-  productos: Producto[] = [];
+  productos! : Observable<Producto[]>;
   constructor(private productosService : ProductoService, private carritoService : CarritoService, private router : Router) { }
   ngOnInit(): void {
       this.productos = this.productosService.obtenerProductos();
