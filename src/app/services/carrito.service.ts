@@ -24,6 +24,8 @@ export class CarritoService {
 <factura>
     <productos>`;
 
+    // Agrupar productos por ID para obtener la cantidad de cada uno
+
     let productosAgrupados: { [key: string]: { descripcion: string, precioUnitario: number, cantidad: number } } = {};
     
     this.carrito.forEach((producto) => {
