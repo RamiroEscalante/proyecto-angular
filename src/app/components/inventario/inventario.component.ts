@@ -1,42 +1,51 @@
 import { Component } from '@angular/core';
 import { InventarioService } from '../../services/inventario.service';
 import { Producto } from '../../models/producto';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-inventario',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './inventario.component.html',
   styleUrl: './inventario.component.css'
 })
 export class InventarioComponent {
+  productos$: Observable<Producto[]>; // Observables para productos
 
-  productos: Producto[] = [];
-  nuevaImagen: string = '';
+  nuevoProducto: Producto = { id: 0, nombre: '', precio: 0, imagen: '' };
 
-  constructor(private inventarioService: InventarioService) {}
-
-  ngOnInit() {
-    this.productos = this.inventarioService.getProductos();
+  constructor(public inventarioService: InventarioService) {
+    this.productos$ = this.inventarioService.productos$; // Asignación dentro del constructor
   }
 
   agregarProducto() {
-    const nuevoProducto = new Producto(
-      Date.now(), // Simulación de un ID único
-      'Producto Ejemplo',
-      100,
-      this.nuevaImagen || 'https://via.placeholder.com/150' // Imagen por defecto
-    );
+    if (!this.nuevoProducto.nombre || this.nuevoProducto.precio <= 0) {
+      alert("Por favor, ingrese un nombre y un precio válido.");
+      return;
+    }
+
+    const nuevoProducto: Producto = {
+      id: this.nuevoProducto.id,
+      nombre: this.nuevoProducto.nombre,
+      precio: this.nuevoProducto.precio,
+      imagen: this.nuevoProducto.imagen || 'https://via.placeholder.com/150'
+    };
+
     this.inventarioService.agregarProducto(nuevoProducto);
-    this.productos = this.inventarioService.getProductos();
+
+    // Reiniciar formulario
+    this.nuevoProducto = { id: 0, nombre: '', precio: 0, imagen: '' };
   }
 
   eliminarProducto(id: number) {
     this.inventarioService.eliminarProducto(id);
-    this.productos = this.inventarioService.getProductos();
   }
 
   descargarXML() {
     this.inventarioService.generarXML();
   }
-
 }
+

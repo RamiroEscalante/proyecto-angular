@@ -23,9 +23,11 @@ export class ProductoComponent implements OnInit {
     this.carritoService.agregarProducto(producto);
   }
 
-  
-
   irAlCarrito(){
     this.router.navigate(['/carrito']);
+  }
+
+  irInventario(){
+    this.router.navigate(['inventario']);
   }
 } 

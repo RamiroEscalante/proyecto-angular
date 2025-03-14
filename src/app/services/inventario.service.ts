@@ -1,55 +1,53 @@
 import { Injectable } from '@angular/core';
 import { Producto } from '../models/producto';
+import { ProductoService } from '../services/producto.service';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class InventarioService {
+  private productosSubject = new BehaviorSubject<Producto[]>([]);
+  productos$ = this.productosSubject.asObservable();
 
-  private productos : Producto[] = [];
-
-  constructor() { }
-
-   // Obtener todos los productos
-   getProductos(): Producto[] {
-    return this.productos;
+  constructor(private productoService: ProductoService) { 
+    this.cargarProductos();
   }
 
-  // Agregar un nuevo producto
+  cargarProductos() {
+    this.productoService.obtenerProductos().subscribe(productos => {
+      this.productosSubject.next(productos);
+    });
+  }
+
+  getProductos(): Producto[] {
+    return this.productosSubject.getValue();
+  }
+
   agregarProducto(producto: Producto) {
-    this.productos.push(producto);
+    const nuevosProductos = [...this.getProductos(), producto];
+    this.productosSubject.next(nuevosProductos);
     this.generarXML();
   }
 
-  // Editar un producto existente
-  editarProducto(id: number, datosActualizados: Partial<Producto>) {
-    const index = this.productos.findIndex(p => p.id === id);
-    if (index !== -1) {
-      this.productos[index] = { ...this.productos[index], ...datosActualizados };
-      this.generarXML();
-    }
-  }
-
-  // Eliminar un producto
   eliminarProducto(id: number) {
-    this.productos = this.productos.filter(p => p.id !== id);
+    const nuevosProductos = this.getProductos().filter(p => p.id !== id);
+    this.productosSubject.next(nuevosProductos);
     this.generarXML();
   }
 
-   // Generar un archivo XML con la lista de productos
-   generarXML() {
+  generarXML() {
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<inventario>\n`;
-    this.productos.forEach(p => {
+    this.getProductos().forEach(p => {
       xml += `  <producto>\n`;
       xml += `    <id>${p.id}</id>\n`;
       xml += `    <nombre>${p.nombre}</nombre>\n`;
       xml += `    <precio>${p.precio}</precio>\n`;
-      xml += `    <descripcion>${p.imagen}</descripcion>\n`;
+      xml += `    <imagen>${p.imagen}</imagen>\n`;
       xml += `  </producto>\n`;
     });
     xml += `</inventario>`;
 
-    // Crear un Blob y descargar el archivo XML
     const blob = new Blob([xml], { type: 'application/xml' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -57,5 +55,7 @@ export class InventarioService {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    localStorage.setItem('inventarioXML', xml);
   }
 }

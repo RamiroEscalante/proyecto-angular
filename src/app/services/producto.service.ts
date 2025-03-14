@@ -1,30 +1,43 @@
 import { Injectable } from '@angular/core';
-import { Producto } from '../models/producto';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductoService {
+  private xmlUrl = "asset/productos.xml"; // Corrige la URL
 
-  private xmlUrl = "asset/productos.xml"
-  constructor(private http:HttpClient){
+  constructor(private http: HttpClient) {}
 
+  obtenerProductos(): Observable<any[]> {
+    const xmlGuardado = localStorage.getItem('inventarioXML');
+    if (xmlGuardado) {
+      return of(this.parseXML(xmlGuardado));
+    } else {
+      return this.http.get(this.xmlUrl, { responseType: "text" }).pipe(
+        map(xml => {
+          const productos = this.parseXML(xml);
+          localStorage.setItem('inventarioXML', xml); // Guarda en localStorage
+          return productos;
+        }),
+        catchError(error => {
+          console.error("Error cargando el XML:", error);
+          return of([]); // Si hay error, retorna un array vacío
+        })
+      );
+    }
   }
 
-  obtenerProductos() : Observable<any[]> {
-    return this.http.get(this.xmlUrl, {responseType:"text"}).pipe(map(xml => {
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xml, "text/xml");
-      const producto = Array.from(xmlDoc.getElementsByTagName("producto")).map(prod => ({
-        id: prod.getElementsByTagName("id")[0].textContent,
-        nombre: prod.getElementsByTagName("nombre")[0].textContent,
-        precio: prod.getElementsByTagName("precio")[0].textContent,
-        imagen: prod.getElementsByTagName("imagen")[0].textContent,
-      }));
-      return producto;
+  private parseXML(xml: string): any[] {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xml, "text/xml");
+    return Array.from(xmlDoc.getElementsByTagName("producto")).map(prod => ({
+      id: Number(prod.getElementsByTagName("id")[0].textContent), // Convertir a número
+      nombre: prod.getElementsByTagName("nombre")[0].textContent || "",
+      precio: Number(prod.getElementsByTagName("precio")[0].textContent), // Convertir a número
+      imagen: prod.getElementsByTagName("imagen")[0].textContent || "",
     }));
   }
 }
