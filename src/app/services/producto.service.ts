@@ -17,7 +17,7 @@ export class ProductoService {
   obtenerProductos() : Observable<any[]> {
     return this.http.get(this.xmlUrl, {responseType:"text"}).pipe(map(xml => {
       const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xml, "text/html");
+      const xmlDoc = parser.parseFromString(xml, "text/xml");
       const producto = Array.from(xmlDoc.getElementsByTagName("producto")).map(prod => ({
         id: prod.getElementsByTagName("id")[0].textContent,
         nombre: prod.getElementsByTagName("nombre")[0].textContent,

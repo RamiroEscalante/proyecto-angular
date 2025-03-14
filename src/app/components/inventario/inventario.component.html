@@ -1,0 +1,29 @@
+<h2>Gestión de Inventario</h2>
+
+<input type="text" [(ngModel)]="nuevaImagen" placeholder="URL de la imagen" />
+<button (click)="agregarProducto()">Agregar Producto</button>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Precio</th>
+      <th>Imagen</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let producto of productos">
+      <td>{{ producto.id }}</td>
+      <td>{{ producto.nombre }}</td>
+      <td>{{ producto.precio | currency }}</td>
+      <td><img [src]="producto.imagen" alt="Imagen del producto" width="50"></td>
+      <td>
+        <button (click)="eliminarProducto(producto.id)">Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<button (click)="descargarXML()">Descargar XML</button>
